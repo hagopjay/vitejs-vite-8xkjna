@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CamanJS Real-Time Artistic Effects</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/camanjs/4.1.2/caman.full.min.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: #000;
+      }
+      canvas,
+      img {
+        max-width: 100%;
+        max-height: 80vh;
+        border: 2px solid #333;
+        margin: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <img id="original" alt="Original Image" />
+    <canvas id="canvas"></canvas>
+
+    <script>
+      const img = document.getElementById('original');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      img.crossOrigin = 'Anonymous';
+      img.src = 'https://picsum.photos/800/600';
+
+      img.onload = function () {
+        img.style.display = 'block';
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+
+        let effect = 0.2;
+        function applyArtisticEffects() {
+          Caman(canvas, function () {
+            this.revert(false);
+
+            // Slow-changing base effects
+            this.brightness(Math.sin(effect * 0.13) * 30) // Increased from 0.02 to 0.03
+              .contrast(Math.cos(effect * 0.12) * 20 + 10) // Increased from 0.015 to 0.02
+              .saturation(Math.sin(effect * 0.015) * 50) // Increased from 0.01 to 0.015
+              .hue(Math.sin(effect * 0.007) * 100); // Increased from 0.005 to 0.007
+
+            // Artistic color manipulation
+            const phase = Math.sin(effect * 0.63);
+            this.channels({
+              red: Math.sin(phase) * 30,
+              blue: Math.cos(phase) * 30,
+            });
+
+            // Subtle vignette effect
+            this.vignette(Math.abs(Math.sin(effect * 0.08)) * 40 + 20, 60);
+
+            // Periodic effects for added interest
+            if (Math.sin(effect * 0.005) > 0.7) {
+              this.vibrance(50);
+            } else if (Math.sin(effect * 0.005) < -0.7) {
+              this.greyscale();
+            }
+
+            // Subtle grain effect
+            this.noise(5);
+
+            // Smooth transitions with curves
+            const curveStrength = Math.sin(effect * 0.01) * 20;
+            this.curves('rgb', [0, 0], [128, 128 + curveStrength], [255, 255]);
+
+            this.render(() => {
+              effect += 0.1; // Slowed down effect progression
+              requestAnimationFrame(applyArtisticEffects); // Continuous updates
+            });
+          });
+        }
+
+        applyArtisticEffects();
+      };
+
+      img.onerror = function () {
+        console.error('Error loading image');
+      };
+    </script>
+  </body>
+</html>

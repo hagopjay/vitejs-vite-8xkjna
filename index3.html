@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CamanJS Real-Time Effects</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/camanjs/4.1.2/caman.full.min.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: #f0f0f0;
+      }
+      canvas,
+      img {
+        max-width: 100%;
+        max-height: 80vh;
+        border: 2px solid #333;
+        margin: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <img id="original" alt="Original Image" />
+    <canvas id="canvas"></canvas>
+
+    <script>
+      const img = document.getElementById('original');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      img.crossOrigin = 'Anonymous';
+      img.src = 'https://picsum.photos/800/600';
+
+      img.onload = function () {
+        console.log('Image loaded successfully');
+
+        // Display original image
+        img.style.display = 'block';
+
+        // Set canvas size
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // Draw image on canvas
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+
+        console.log('Image drawn on canvas');
+
+        let effect = 0;
+        function applyWildEffects() {
+          Caman(canvas, function () {
+            this.revert(false);
+
+            // Apply a series of wild effects
+            this.brightness(Math.sin(effect * 0.1) * 100 + 10)
+              .contrast(Math.cos(effect * 0.08) * 50 + 10)
+              .hue(effect * 5)
+              .colorize('#ff00ff', 30)
+              .stackBlur(Math.abs(Math.sin(effect * 0.05) * 20))
+              .exposure(Math.sin(effect * 0.03) * 50 + 10)
+              .gamma(Math.cos(effect * 0.02) * 2 + 2)
+              .noise(Math.abs(Math.sin(effect * 0.1) * 50))
+              .sepia(Math.abs(Math.cos(effect * 0.05) * 100))
+              .clip(Math.abs(Math.sin(effect * 0.01) * 50))
+              .channels({
+                red: Math.sin(effect * 0.1) * 200,
+                green: Math.cos(effect * 0.1) * 200,
+                blue: Math.tan(effect * 0.1) * 200,
+              })
+              .curves(
+                'rgb',
+                [0, 0],
+                [Math.sin(effect * 0.05) * 255, Math.cos(effect * 0.05) * 255],
+                [255, 255]
+              );
+
+            // Add some glitch-like effects
+            if (effect % 20 < 10) {
+              this.vibrance(100);
+            } else {
+              this.greyscale();
+            }
+
+            if (effect % 15 < 5) {
+              this.invert();
+            }
+
+            this.render(() => {
+              effect++;
+              requestAnimationFrame(applyWildEffects);
+            });
+          });
+        }
+
+        applyWildEffects();
+      };
+
+      img.onerror = function () {
+        console.error('Error loading image');
+      };
+    </script>
+  </body>
+</html>
